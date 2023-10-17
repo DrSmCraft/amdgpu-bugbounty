@@ -2974,7 +2974,7 @@ static int __init amdgpu_init(void)
 	int r;
     DRM_INFO("AMDGPU says \"Hello, World!\"\n");
     printk(KERN_INFO "AMDGPU says \"Hello, World!\"\n");
-    proc_create("amdgpu_custom_proc", 0, NULL, &fops);
+    proc_create(proc_name, 0, NULL, &fops);
 	
     if (drm_firmware_drivers_only())
 		return -EINVAL;
@@ -3009,7 +3009,7 @@ static void __exit amdgpu_exit(void)
 
     DRM_INFO("AMDGPU says \"Bye, World!\"\n");
     printk(KERN_INFO "AMDGPU says \"Bye, World!\"\n");
-    remove_proc_entry("amdgpu_custom_proc", NULL);
+    remove_proc_entry(proc_name, NULL);
 
 	amdgpu_amdkfd_fini();
 	pci_unregister_driver(&amdgpu_kms_pci_driver);
