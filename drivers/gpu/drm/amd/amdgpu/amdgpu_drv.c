@@ -2943,21 +2943,27 @@ static ssize_t custom_read(struct file* file, char __user* user_buffer, size_t c
 }
 */
 
-static int hello_proc_show(struct seq_file *m, void *v){
-    printk(KERN_INFO "AMDGPU calling custom read method.");
-    seq_printf(m, "Hello, World from AMDGPU Proc!\n");
+static int info_proc_show(struct seq_file *m, void *v){
+     printk(KERN_INFO "AMDGPU calling custom read method.");
+
+    char buffer[1024];
+    snprintf(buffer, sizeof(buffer), "Hello, World from AMDGPU Proc!\namdgpu_vm_size: %d\namdgpu_vm_fragment_size: %d\namdgpu_vm_block_size: %d\namdgpu_vm_fault_stop: %d\namdgpu_vm_debug: %d\namdgpu_vm_update_mode: %d\n", amdgpu_vm_size, amdgpu_vm_fragment_size, amdgpu_vm_block_size, amdgpu_vm_fault_stop,amdgpu_vm_debug,amdgpu_vm_update_mode);
+    printf("%s", buffer);
+
+    seq_printf(m, buffer);
+
     return 0;
 }
 
-static int amdgpu_custom_proc_open(struct inode *inode, struct file *file){
-    return single_open(file, hello_proc_show, NULL);
+static int amdgpu_info_proc_open(struct inode *inode, struct file *file){
+    return single_open(file, info_proc_show, NULL);
 }
 
 
 
 static struct proc_ops fops =
 {
-    .proc_open = amdgpu_custom_proc_open,
+    .proc_open = amdgpu_info_proc_open,
     .proc_read = seq_read,
     .proc_lseek = seq_lseek,
     .proc_release = single_release
