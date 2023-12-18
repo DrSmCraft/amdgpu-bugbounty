@@ -2944,12 +2944,12 @@ static ssize_t custom_read(struct file* file, char __user* user_buffer, size_t c
 */
 
 static int info_proc_show(struct seq_file *m, void *v){
-     printk(KERN_INFO "AMDGPU calling custom read method.");
+     printk(KERN_ALERT "AMDGPU calling custom read method. %s %d", __FUNCTION__, __LINE__);
 
     char buffer[1024];
     snprintf(buffer, sizeof(buffer), "Hello, World from AMDGPU Proc!\namdgpu_vm_size: %d\namdgpu_vm_fragment_size: %d\namdgpu_vm_block_size: %d\namdgpu_vm_fault_stop: %d\namdgpu_vm_debug: %d\namdgpu_vm_update_mode: %d\n", amdgpu_vm_size, amdgpu_vm_fragment_size, amdgpu_vm_block_size, amdgpu_vm_fault_stop,amdgpu_vm_debug,amdgpu_vm_update_mode);
-    printf("%s", buffer);
-
+    printk(KERN_INFO "Hello, World from AMDGPU Proc!\namdgpu_vm_size: %d\namdgpu_vm_fragment_size: %d\namdgpu_vm_block_size: %d\namdgpu_vm_fault_stop: %d\namdgpu_vm_debug: %d\namdgpu_vm_update_mode: %d\n", amdgpu_vm_size, amdgpu_vm_fragment_size, amdgpu_vm_block_size, amdgpu_vm_fault_stop,amdgpu_vm_debug,amdgpu_vm_update_mode);
+    //printf("%s", buffer);
     seq_printf(m, buffer);
 
     return 0;
