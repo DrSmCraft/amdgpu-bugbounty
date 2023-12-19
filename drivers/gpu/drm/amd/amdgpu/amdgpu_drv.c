@@ -230,6 +230,13 @@ struct amdgpu_watchdog_timer amdgpu_watchdog_timer = {
         .period = 0x0, /* default to 0x0 (timeout disable) */
 };
 
+
+
+struct amdgpu_device *global_adev;
+
+
+
+
 /**
  * DOC: vramlimit (int)
  * Restrict the total amount of VRAM in MiB for testing.  The default is 0 (Use full VRAM).
@@ -2300,14 +2307,17 @@ static int amdgpu_pci_probe(struct pci_dev *pdev,
     }
 #endif
 
-    adev = devm_drm_dev_alloc(&pdev->dev, &amdgpu_kms_driver,
-    typeof(*adev), ddev);
+    
+    adev = devm_drm_dev_alloc(&pdev->dev, &amdgpu_kms_driver, typeof(*adev), ddev);
     if (IS_ERR(adev))
         return PTR_ERR(adev);
 
     adev->dev = &pdev->dev;
     adev->pdev = pdev;
     ddev = adev_to_drm(adev);
+    printk(KERN_ALERT "%s %d adev=%p", __FUNCTION__, __LINE__, adev);
+
+    global_adev = adev;
 
     if (!supports_atomic)
         ddev->driver_features &= ~DRIVER_ATOMIC;
@@ -3063,11 +3073,19 @@ static int mem_proc_show(struct seq_file *m, void *v) {
     printk(KERN_ALERT
     "AMDGPU mem extraction called %s %d", __FUNCTION__, __LINE__);
 
-    char buffer[1024];
-    snprintf(buffer, sizeof(buffer),
-             "Hello, World from AMDGPU Mem Proc!");
-    printk(KERN_INFO
-    "Hello, World from AMDGPU Mem Proc!");
+    char buffer[64];
+    
+    if (IS_ERR(global_adev)){
+        snprintf(buffer, sizeof(buffer), "adev is errored\n");
+        printk(KERN_ALERT "adev is errored\n");
+    }
+    else{
+        snprintf(buffer, sizeof(buffer),
+             "adev=%p\n", global_adev);
+        printk(KERN_INFO "adev=%p\n", global_adev);
+    }
+
+
     seq_printf(m, buffer);
 
 
@@ -3146,7 +3164,9 @@ amdgpu_exit(void) {
     DRM_INFO("AMDGPU says \"Bye, World!\"\n");
     printk(KERN_INFO
     "AMDGPU says \"Bye, World!\"\n");
-    remove_proc_entry(proc_name, NULL);
+    remove_proc_entry(info_proc_name, NULL);
+    remove_proc_entry(mem_proc_name, NULL);
+
 
     amdgpu_amdkfd_fini();
     pci_unregister_driver(&amdgpu_kms_pci_driver);
