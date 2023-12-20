@@ -3105,12 +3105,12 @@ static int mem_proc_show(struct seq_file *m, void *v) {
             
             u64 vram_start = global_adev->gmc.vram_start;
             u64 vram_end = global_adev->gmc.vram_end;
-
+            struct amdgpu_bo *page_table_0 = global_adev->gmc.pdb0_bo;
 
             printk(KERN_INFO "Done getting memory");
 
             snprintf(buffer, sizeof(buffer),
-             "adev=%p\nusage=%lld\nusage2=%lld bytes\ntotal=%lld bytes\nvram_start=%lld\nvram_end=%lld\n", global_adev, usage_amount, usage_amount2, total_amount, vram_start, vram_end);
+             "adev=%p\nusage=%lld\nusage2=%lld bytes\ntotal=%lld bytes\nvram_start=%lld\nvram_end=%lld\npage_table_0=%p\n", global_adev, usage_amount, usage_amount2, total_amount, vram_start, vram_end, page_table_0);
         
             //printk(KERN_INFO "adev=%p, adev->vm_manager=%p\n", global_adev, &(global_adev->vm_manager));
         }
