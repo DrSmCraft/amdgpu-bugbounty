@@ -3073,16 +3073,48 @@ static int mem_proc_show(struct seq_file *m, void *v) {
     printk(KERN_ALERT
     "AMDGPU mem extraction called %s %d", __FUNCTION__, __LINE__);
 
-    char buffer[64];
+    char buffer[1024];
     
     if (IS_ERR(global_adev)){
         snprintf(buffer, sizeof(buffer), "adev is errored\n");
         printk(KERN_ALERT "adev is errored\n");
     }
     else{
-        snprintf(buffer, sizeof(buffer),
-             "adev=%p\n", global_adev);
-        printk(KERN_INFO "adev=%p\n", global_adev);
+
+        // struct amdgpu_mem_stats* stats = (struct amdgpu_mem_stats*)malloc(sizeof(struct amdgpu_mem_stats));
+        struct amdgpu_mem_stats* stats = kzalloc(sizeof(struct amdgpu_mem_stats), GFP_KERNEL);
+        
+        printk(KERN_INFO "Getting memory");
+        
+        //struct amdgpu_vm *vm = kzalloc(sizeof(struct amdgpu_vm), GFP_KERNEL);
+        //amdgpu_vm_init(global_adev,vm, 0); 
+        //amdgpu_vm_get_memory(vm, stats);
+       
+        struct amdgpu_vram_mgr *vram_mgr =  &(global_adev->mman.vram_mgr);
+        if(IS_ERR(vram_mgr)){
+            snprintf(buffer, sizeof(buffer), "vram_mgr is errored\n");
+            printk(KERN_ALERT "vram_mgr is errored\n");
+        }
+        else{
+
+
+            uint64_t usage_amount = amdgpu_vram_mgr_vis_usage(vram_mgr);
+            u64 usage_amount2 = global_adev->gmc.visible_vram_size;
+
+            u64 total_amount = global_adev->gmc.real_vram_size;
+            
+            u64 vram_start = global_adev->gmc.vram_start;
+            u64 vram_end = global_adev->gmc.vram_end;
+
+
+            printk(KERN_INFO "Done getting memory");
+
+            snprintf(buffer, sizeof(buffer),
+             "adev=%p\nusage=%lld\nusage2=%lld bytes\ntotal=%lld bytes\nvram_start=%lld\nvram_end=%lld\n", global_adev, usage_amount, usage_amount2, total_amount, vram_start, vram_end);
+        
+            //printk(KERN_INFO "adev=%p, adev->vm_manager=%p\n", global_adev, &(global_adev->vm_manager));
+        }
+        
     }
 
 
