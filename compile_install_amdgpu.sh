@@ -14,10 +14,6 @@ fi
 
 sudo rmmod amdgpu
 
-if [[ $? -ne 0 ]] ; then
-    exit 1
-fi
-
 
 sudo insmod amdgpu_link/amdgpu.ko
 

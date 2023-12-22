@@ -3053,18 +3053,24 @@ static char mem_proc_name[] = "amdgpu_mem";
 static int info_proc_show(struct seq_file *m, void *v) {
     printk(KERN_ALERT
     "AMDGPU calling custom read method. %s %d", __FUNCTION__, __LINE__);
+            u64 usage_amount2 = global_adev->gmc.visible_vram_size;
+
+            u64 total_amount = global_adev->gmc.real_vram_size;
+            
+            u64 vram_start = global_adev->gmc.vram_start;
+            u64 vram_end = global_adev->gmc.vram_end;
+
 
     char buffer[1024];
     snprintf(buffer, sizeof(buffer),
-             "Hello, World from AMDGPU Proc!\namdgpu_vm_size: %d\namdgpu_vm_fragment_size: %d\namdgpu_vm_block_size: %d\namdgpu_vm_fault_stop: %d\namdgpu_vm_debug: %d\namdgpu_vm_update_mode: %d\namdgpu_virtual_display:%s\n",
-             amdgpu_vm_size, amdgpu_vm_fragment_size, amdgpu_vm_block_size, amdgpu_vm_fault_stop, amdgpu_vm_debug,
-             amdgpu_vm_update_mode,
-             amdgpu_virtual_display);
-    printk(KERN_INFO
-    "Hello, World from AMDGPU Proc!\namdgpu_vm_size: %d\namdgpu_vm_fragment_size: %d\namdgpu_vm_block_size: %d\namdgpu_vm_fault_stop: %d\namdgpu_vm_debug: %d\namdgpu_vm_update_mode: %d\namdgpu_virtual_display:%s\n", amdgpu_vm_size, amdgpu_vm_fragment_size, amdgpu_vm_block_size, amdgpu_vm_fault_stop, amdgpu_vm_debug, amdgpu_vm_update_mode,
-            amdgpu_virtual_display);
-    seq_printf(m, buffer);
+             "Hello, World from AMDGPU Proc!\namdgpu_product_name: %s\namdgpu_product_number: %s\namdgpu_serial:%s\nadev=%p\nusage2=%lld bytes\ntotal=%lld bytes\nvram_start=%lld\nvram_end=%lld\n", global_adev->product_name, global_adev->product_number, global_adev->serial, global_adev, usage_amount2, total_amount, vram_start, vram_end
+);
 
+    printk(KERN_INFO "Hello, World from AMDGPU Proc!\namdgpu_product_name: %s\namdgpu_product_number: %s\namdgpu_serial:%s\nadev=%p\nusage2=%lld bytes\ntotal=%lld bytes\nvram_start=%lld\nvram_end=%lld\n", global_adev->product_name, global_adev->product_number, global_adev->serial, global_adev,  usage_amount2, total_amount, vram_start, vram_end
+);
+     seq_printf(m, buffer);
+
+               
 
     return 0;
 }
@@ -3073,52 +3079,35 @@ static int mem_proc_show(struct seq_file *m, void *v) {
     printk(KERN_ALERT
     "AMDGPU mem extraction called %s %d", __FUNCTION__, __LINE__);
 
-    char buffer[1024];
+    char buffer[32];
     
     if (IS_ERR(global_adev)){
         snprintf(buffer, sizeof(buffer), "adev is errored\n");
         printk(KERN_ALERT "adev is errored\n");
+        seq_printf(m, buffer);
+        return 0;
     }
     else{
 
-        // struct amdgpu_mem_stats* stats = (struct amdgpu_mem_stats*)malloc(sizeof(struct amdgpu_mem_stats));
-        struct amdgpu_mem_stats* stats = kzalloc(sizeof(struct amdgpu_mem_stats), GFP_KERNEL);
-        
-        printk(KERN_INFO "Getting memory");
-        
-        //struct amdgpu_vm *vm = kzalloc(sizeof(struct amdgpu_vm), GFP_KERNEL);
-        //amdgpu_vm_init(global_adev,vm, 0); 
-        //amdgpu_vm_get_memory(vm, stats);
        
-        struct amdgpu_vram_mgr *vram_mgr =  &(global_adev->mman.vram_mgr);
-        if(IS_ERR(vram_mgr)){
-            snprintf(buffer, sizeof(buffer), "vram_mgr is errored\n");
-            printk(KERN_ALERT "vram_mgr is errored\n");
-        }
-        else{
+        printk(KERN_INFO "Getting memory");
+        u64 usage_amount2 = global_adev->gmc.visible_vram_size;
 
+        u64 total_amount = global_adev->gmc.real_vram_size;      
+        u64 vram_start = global_adev->gmc.vram_start;
+        u64 vram_end = global_adev->gmc.vram_end;
 
-            uint64_t usage_amount = amdgpu_vram_mgr_vis_usage(vram_mgr);
-            u64 usage_amount2 = global_adev->gmc.visible_vram_size;
+        char b[256];
+        amdgpu_device_vram_access(global_adev, 0, b, 256, 0);
 
-            u64 total_amount = global_adev->gmc.real_vram_size;
-            
-            u64 vram_start = global_adev->gmc.vram_start;
-            u64 vram_end = global_adev->gmc.vram_end;
-            struct amdgpu_bo *page_table_0 = global_adev->gmc.pdb0_bo;
+        seq_printf(m, b);
 
-            printk(KERN_INFO "Done getting memory");
-
-            snprintf(buffer, sizeof(buffer),
-             "adev=%p\nusage=%lld\nusage2=%lld bytes\ntotal=%lld bytes\nvram_start=%lld\nvram_end=%lld\npage_table_0=%p\n", global_adev, usage_amount, usage_amount2, total_amount, vram_start, vram_end, page_table_0);
+        printk(KERN_INFO "Done getting memory");
         
-            //printk(KERN_INFO "adev=%p, adev->vm_manager=%p\n", global_adev, &(global_adev->vm_manager));
-        }
         
     }
 
 
-    seq_printf(m, buffer);
 
 
     return 0;
