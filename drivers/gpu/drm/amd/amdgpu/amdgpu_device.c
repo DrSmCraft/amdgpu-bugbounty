@@ -308,7 +308,7 @@ bool amdgpu_device_supports_smart_shift(struct drm_device *dev)
  * @size: read/write size, sizeof(@buf) must > @size
  * @write: true - write to vram, otherwise - read from vram
  */
-void amdgpu_device_mm_access(struct amdgpu_device *adev, loff_t pos,
+size_t amdgpu_device_mm_access(struct amdgpu_device *adev, loff_t pos,
 			     void *buf, size_t size, bool write)
 {
 	unsigned long flags;
@@ -316,9 +316,10 @@ void amdgpu_device_mm_access(struct amdgpu_device *adev, loff_t pos,
 	uint32_t *data = buf;
 	uint64_t last;
 	int idx;
+    size_t count = 0;
 
 	if (!drm_dev_enter(adev_to_drm(adev), &idx))
-		return;
+		return count;
 
 	BUG_ON(!IS_ALIGNED(pos, 4) || !IS_ALIGNED(size, 4));
 
@@ -335,10 +336,14 @@ void amdgpu_device_mm_access(struct amdgpu_device *adev, loff_t pos,
 			WREG32_NO_KIQ(mmMM_DATA, *data++);
 		else
 			*data++ = RREG32_NO_KIQ(mmMM_DATA);
+
+        count += 1;
 	}
 
 	spin_unlock_irqrestore(&adev->mmio_idx_lock, flags);
 	drm_dev_exit(idx);
+
+    return count;
 }
 
 /**
@@ -395,7 +400,7 @@ size_t amdgpu_device_aper_access(struct amdgpu_device *adev, loff_t pos,
  * @size: read/write size, sizeof(@buf) must > @size
  * @write: true - write to vram, otherwise - read from vram
  */
-void amdgpu_device_vram_access(struct amdgpu_device *adev, loff_t pos,
+size_t amdgpu_device_vram_access(struct amdgpu_device *adev, loff_t pos,
 			       void *buf, size_t size, bool write)
 {
 	size_t count;
@@ -407,8 +412,10 @@ void amdgpu_device_vram_access(struct amdgpu_device *adev, loff_t pos,
 		/* using MM to access rest vram */
 		pos += count;
 		buf += count;
-		amdgpu_device_mm_access(adev, pos, buf, size, write);
+		count += amdgpu_device_mm_access(adev, pos, buf, size, write);
 	}
+
+    return count;
 }
 
 /*

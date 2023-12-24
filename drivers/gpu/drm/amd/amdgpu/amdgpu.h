@@ -1109,12 +1109,12 @@ void amdgpu_device_fini_sw(struct amdgpu_device *adev);
 
 int amdgpu_gpu_wait_for_idle(struct amdgpu_device *adev);
 
-void amdgpu_device_mm_access(struct amdgpu_device *adev, loff_t pos,
+size_t amdgpu_device_mm_access(struct amdgpu_device *adev, loff_t pos,
 			     void *buf, size_t size, bool write);
 size_t amdgpu_device_aper_access(struct amdgpu_device *adev, loff_t pos,
 				 void *buf, size_t size, bool write);
 
-void amdgpu_device_vram_access(struct amdgpu_device *adev, loff_t pos,
+size_t amdgpu_device_vram_access(struct amdgpu_device *adev, loff_t pos,
 			       void *buf, size_t size, bool write);
 uint32_t amdgpu_device_wait_on_rreg(struct amdgpu_device *adev,
 			    uint32_t inst, uint32_t reg_addr, char reg_name[],

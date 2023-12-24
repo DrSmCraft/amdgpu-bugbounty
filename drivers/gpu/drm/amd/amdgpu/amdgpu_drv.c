@@ -3091,17 +3091,23 @@ static int mem_proc_show(struct seq_file *m, void *v) {
 
        
         printk(KERN_INFO "Getting memory");
+
+        /*
         u64 usage_amount2 = global_adev->gmc.visible_vram_size;
 
         u64 total_amount = global_adev->gmc.real_vram_size;      
         u64 vram_start = global_adev->gmc.vram_start;
         u64 vram_end = global_adev->gmc.vram_end;
 
-        char b[256];
-        amdgpu_device_vram_access(global_adev, 0, b, 256, 0);
 
-        seq_printf(m, b);
+        */
 
+        char b[1024];
+        size_t count = amdgpu_device_vram_access(global_adev, 1024, b, 1024, 0);
+
+        seq_printf(m, "%s\n", b);
+
+        printk(KERN_INFO "Accessed %d chars", count);
         printk(KERN_INFO "Done getting memory");
         
         
